@@ -1,0 +1,166 @@
+<!doctype html>
+<html class="h-100">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="./static/bootstrap.min.css">
+    <link rel="stylesheet" href="./static/jquery-confirm.min.css">
+    <script src="./static/jquery-3.4.1.slim.min.js"></script>
+    <script src="./static/popper.min.js"></script>
+    <script src="./static/bootstrap.min.js"></script>
+    <script src="./static/jquery-confirm.min.js"></script>
+    <title>材料切割</title>
+</head>
+<body class="h-100" style="padding: 10px 0px;">
+    <div class="container-fluid h-100">
+        <div class="row h-100">
+            <div class="col-4 h-100 d-flex flex-column">
+                <div class="form-group">
+                    <label for="material">材料长度</label>
+                    <input type="text" class="form-control" id="material">
+                </div>
+                <div class="form-group">
+                    <label for="cost">切割损耗</label>
+                    <input type="text" class="form-control" id="cost">
+                </div>
+                <div class="form-group flex-grow-1 d-flex flex-column">
+                    <label for="orders">尺寸（每行只填一个）</label>
+                    <textarea class="form-control h-100" id="orders"></textarea>
+                </div>
+                <button class="btn btn-primary btn-block" id="submitButton">计算</button>
+            </div>
+            <div class="col-8 h-100">
+                <textarea class="form-control h-100" id="solutions" readonly></textarea>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function() {
+            $("#material").val(600)
+            $("#cost").val(1)
+            $("#orders").val("100\n200\n300")
+
+            $("#submitButton").on("click", function () {
+                let s
+
+                let material = 0
+                s = $("#material").val()
+                if (isPositiveNumber(s)) {
+                    material = parseFloat(s)
+                } else {
+                    error(`材料长度不是正数`)
+                    return
+                }
+
+                let cost = 0
+                s = $("#cost").val()
+                if (s.length > 0) {
+                    if (isPositiveNumber(s)) {
+                        cost = parseFloat(s)
+                    } else {
+                        error(`切割损耗不是正数`)
+                        return
+                    }
+                }
+                if (cost > material) {
+                    error(`切割损耗【${cost}】超过材料长度【${material}】`)
+                    return
+                }
+
+                s = $("#orders").val().trim()
+                if (s.length == 0) {
+                    error(`尺寸未填写`)
+                    return
+                }
+                const orders = []
+                const lines = s.split("\n")
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (!isPositiveNumber(line)) {
+                        error(`第${i + 1}行尺寸【${line}】不是正数`)
+                        return
+                    }
+                    const order = parseFloat(line)
+                    if (order > material) {
+                        error(`第${i + 1}行尺寸【${line}】超出材料长度【${material}】`)
+                        return
+                    }
+                    orders.push(order)
+                }
+
+                const solutions = cutting_stock(material, cost, orders)
+                s = `共需${solutions.length}根材料，切割方法如下：\n`
+                solutions.forEach(solution => {
+                    s += solution.join(", ") + "\n"
+                })
+                $("#solutions").val(s)
+            })
+        })
+
+        function error(s) {
+            $.confirm({
+                title: "错误",
+                content: s,
+                type: "red",
+                draggable: false,
+                buttons: {
+                    close: {
+                        text: "知道了",
+                        action: function () {}
+                    }
+                }
+            });
+        }
+
+        function isPositiveNumber(s) {
+            if (s == null) {
+                return false
+            }
+            return /^(([1-9]+\d*)|0)(\.\d+)?$/.test("" + s)
+        }
+
+        function cutting_stock(material, cost, orders) {
+            cut = function (orders) {
+                let waste = material
+                let solution = []
+                f = function (start, combination) {
+                    let total = 0
+                    combination.forEach(l => { total += l })
+                    // 不够切
+                    if (total + (combination.length - 1) * cost > material) {
+                        return
+                    }
+                    // 够切，如果损耗低，则保存切法
+                    const w = material - total
+                    if (w < waste) {
+                        waste = w
+                        solution = combination.slice()
+                    }
+                    // 继续切
+                    for (let i = start; i < orders.length; i++) {
+                        combination.push(orders[i])
+                        f(i + 1, combination.slice())
+                        combination.pop()
+                    }
+                }
+                f(0, [])
+                return solution
+            }
+            const solutions = []
+            orders = orders.slice()
+            while (orders.length > 0) {
+                const solution = cut(orders)
+                solution.forEach(l => {
+                    const pos = orders.indexOf(l)
+                    if (pos > -1) {
+                        orders.splice(pos, 1)
+                    }
+                })
+                solutions.push(solution)
+            }
+            return solutions
+        }
+    </script>
+</body>
+
+</html>
