@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "材料切割",
   "main": "main.js",
+  "repository": "https://github.com/longyuzhou/electron-cutting-stock.git",
   "scripts": {
     "start": "electron .",
     "package": "electron-packager . --platform=win32 --arch=x64 --overwrite"
@@ -10,7 +11,7 @@
   "keywords": [
     "Electron"
   ],
-  "author": "longyz",
+  "author": "longyuzhou",
   "devDependencies": {
     "electron": "^8.2.4"
   },

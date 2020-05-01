@@ -20,8 +20,8 @@
                     <input type="text" class="form-control" id="material">
                 </div>
                 <div class="form-group">
-                    <label for="cost">切割损耗</label>
-                    <input type="text" class="form-control" id="cost">
+                    <label for="losses">切割损耗</label>
+                    <input type="text" class="form-control" id="losses">
                 </div>
                 <div class="form-group flex-grow-1 d-flex flex-column">
                     <label for="orders">尺寸（每行只填一个）</label>
@@ -37,7 +37,7 @@
     <script>
         $(function() {
             $("#material").val(600)
-            $("#cost").val(1)
+            $("#losses").val(1)
             $("#orders").val("100\n200\n300")
 
             $("#submitButton").on("click", function () {
@@ -52,18 +52,18 @@
                     return
                 }
 
-                let cost = 0
-                s = $("#cost").val()
+                let losses = 0
+                s = $("#losses").val()
                 if (s.length > 0) {
                     if (isPositiveNumber(s)) {
-                        cost = parseFloat(s)
+                        losses = parseFloat(s)
                     } else {
                         error(`切割损耗不是正数`)
                         return
                     }
                 }
-                if (cost > material) {
-                    error(`切割损耗【${cost}】超过材料长度【${material}】`)
+                if (losses > material) {
+                    error(`切割损耗【${losses}】超过材料长度【${material}】`)
                     return
                 }
 
@@ -88,7 +88,7 @@
                     orders.push(order)
                 }
 
-                const solutions = cutting_stock(material, cost, orders)
+                const solutions = cutting_stock(material, losses, orders)
                 s = `共需${solutions.length}根材料，切割方法如下：\n`
                 solutions.forEach(solution => {
                     s += solution.join(", ") + "\n"
@@ -119,7 +119,7 @@
             return /^(([1-9]+\d*)|0)(\.\d+)?$/.test("" + s)
         }
 
-        function cutting_stock(material, cost, orders) {
+        function cutting_stock(material, losses, orders) {
             cut = function (orders) {
                 let waste = material
                 let solution = []
@@ -127,7 +127,7 @@
                     let total = 0
                     combination.forEach(l => { total += l })
                     // 不够切
-                    if (total + (combination.length - 1) * cost > material) {
+                    if (total + (combination.length - 1) * losses > material) {
                         return
                     }
                     // 够切，如果损耗低，则保存切法
@@ -162,5 +162,4 @@
         }
     </script>
 </body>
-
 </html>
