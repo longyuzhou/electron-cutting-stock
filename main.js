@@ -7,15 +7,13 @@ function createWindow () {
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 720,
-    useContentSize: true,
     webPreferences: {
-      zoomFactor: 1.1,
       preload: path.join(__dirname, 'preload.js')
     }
   })
 
-  // and remove menu
-  mainWindow.removeMenu()
+  // and maximize window
+  mainWindow.maximize()
 
   // and load the index.html of the app.
   mainWindow.loadFile('index.html')

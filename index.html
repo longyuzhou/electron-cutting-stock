@@ -14,88 +14,202 @@
 <body class="h-100" style="padding: 10px 0px;">
     <div class="container-fluid h-100">
         <div class="row h-100">
-            <div class="col-4 h-100 d-flex flex-column">
-                <div class="form-group">
+            <div class="col-3 h-100 d-flex flex-column">
+                <div class="form-group was-validated">
                     <label for="material">材料长度</label>
-                    <input type="text" class="form-control" id="material">
+                    <input type="number" min="1" class="form-control" required id="material" value="600">
                 </div>
-                <div class="form-group">
+                <div class="form-group was-validated">
                     <label for="losses">切割损耗</label>
-                    <input type="text" class="form-control" id="losses">
+                    <input type="number" min="0" class="form-control" id="losses" value="1">
                 </div>
-                <div class="form-group flex-grow-1 d-flex flex-column">
-                    <label for="orders">尺寸（每行只填一个）</label>
-                    <textarea class="form-control h-100" id="orders"></textarea>
+                <div class="form-group was-validated">
+                    <label for="orders">订单</label>
+                    <div class="form-row">
+                        <div class="col-5">
+                          <input type="number" class="form-control" placeholder="尺寸" min="1" id="length">
+                        </div>
+                        <div class="col-4">
+                          <input type="number" class="form-control" placeholder="数量" required min="1" id="count" value="1">
+                        </div>
+                        <div class="col-3">
+                            <button class="btn btn-primary btn-block" onclick="addOrder()">添加</button>
+                        </div>
+                    </div>
                 </div>
-                <button class="btn btn-primary btn-block" id="submitButton">计算</button>
+                <div class="form-group flex-grow-1 d-flex flex-column overflow-auto">
+                    <ul class="list-group" id="orders"></ul>
+                </div>
+                <button class="btn btn-primary btn-block" onclick="compute()">计算</button>
             </div>
-            <div class="col-8 h-100">
-                <textarea class="form-control h-100" id="solutions" readonly></textarea>
+            <div class="col h-100">
+                <textarea class="form-control h-100" style="font-family: '黑体'; background-color: white;" readonly id="solutions"></textarea>
             </div>
         </div>
     </div>
     <script>
         $(function() {
-            $("#material").val(600)
-            $("#losses").val(1)
-            $("#orders").val("100\n200\n300")
-
-            $("#submitButton").on("click", function () {
-                let s
-
-                let material = 0
-                s = $("#material").val()
-                if (isPositiveNumber(s)) {
-                    material = parseFloat(s)
-                } else {
-                    error(`材料长度不是正数`)
-                    return
+            $("#length,#count").bind("keyup", function(event) {
+                if (event.keyCode == "13") {
+                    addOrder()
                 }
-
-                let losses = 0
-                s = $("#losses").val()
-                if (s.length > 0) {
-                    if (isPositiveNumber(s)) {
-                        losses = parseFloat(s)
-                    } else {
-                        error(`切割损耗不是正数`)
-                        return
-                    }
-                }
-                if (losses > material) {
-                    error(`切割损耗【${losses}】超过材料长度【${material}】`)
-                    return
-                }
-
-                s = $("#orders").val().trim()
-                if (s.length == 0) {
-                    error(`尺寸未填写`)
-                    return
-                }
-                const orders = []
-                const lines = s.split("\n")
-                for (let i = 0; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!isPositiveNumber(line)) {
-                        error(`第${i + 1}行尺寸【${line}】不是正数`)
-                        return
-                    }
-                    const order = parseFloat(line)
-                    if (order > material) {
-                        error(`第${i + 1}行尺寸【${line}】超出材料长度【${material}】`)
-                        return
-                    }
-                    orders.push(order)
-                }
-
-                const solutions = cutting_stock(material, losses, orders)
-                s = `共需${solutions.length}根材料，切割方法如下：\n`
-                solutions.forEach(solution => {
-                    s += solution.join(", ") + "\n"
-                })
-                $("#solutions").val(s)
             })
+
+            orders.add(100, 1)
+            orders.add(200, 1)
+            orders.add(300, 1)
         })
+
+        const orders = {data: []}
+
+        orders.add = function(l, n) {
+            const me = orders
+            const id = `order_${l}`
+            let items = me.data.filter(order => order.id === id)
+            if (items.length === 0) {
+                me.data.push({id: id, length: l, count: n})
+            } else {
+                items[0].count += n
+            }
+            me.render()
+            return id
+        }
+
+        orders.remove = function(id) {
+            const me = orders
+            for (let i = 0; i < me.data.length; i++) {
+                if (me.data[i]["id"] === id) {
+                    me.data.splice(i, 1)
+                }
+            }
+            me.render()
+        }
+
+        orders.render = function() {
+            const me = orders
+            let html = ""
+            me.data.forEach(order => {
+                html += 
+`<li class="list-group-item d-flex justify-content-between align-items-center">
+${order.length} &times; ${order.count}
+<button type="button" class="btn btn-danger" onclick="removeOrder('${order.id}')">删除</button>
+</li>`
+            })
+            $("#orders").html(html)
+        }
+
+        function checkValidity() {
+            for (let i = 0; i < arguments.length; i++) {
+                if (!document.getElementById(arguments[i]).checkValidity()) {
+                    return false
+                }
+            }
+            return true
+        }
+
+        function addOrder() {
+            if (!checkValidity("material", "length", "count")) {
+                error("操作错误，请检查红框标示处的输入值")
+                return
+            }
+            if ($("#length").val().length === 0) {
+                error("请输入尺寸")
+                return
+            }
+            const material = parseFloat($("#material").val())
+            const length = parseFloat($("#length").val())
+            const count = parseFloat($("#count").val())
+            if (length > material) {
+                error(`尺寸【${length}】大于材料长度【${material}】`)
+                return
+            }
+            orders.add(length, count)
+            $("#length").val("")
+            $("#length").focus()
+            $("#count").val("1")
+        }
+
+        function removeOrder(id) {
+            orders.remove(id)
+        }
+
+        function compute() {
+            if (!checkValidity("material", "losses")) {
+                error("操作错误，请检查红框标示处的输入值")
+                return
+            }
+            const material = parseFloat($("#material").val())
+            const losses = parseFloat($("#losses").val())
+            if (losses > material) {
+                error(`切割损耗【${losses}】大于材料长度【${material}】`)
+                return
+            }
+            $("#solutions").val(calc_and_dump(material, losses, orders.data))
+        }
+
+        function calc_and_dump(material, losses, orders) {
+            let s = `材料长度：${material}\n切割损耗：${losses}\n订单：\n`
+            let table = [["序号", "尺寸", "数量"]]
+            orders.forEach((order, i) => {
+                table.push([i + 1, order.length, order.count])
+            })
+            size_fn = function(r, c, v) {
+                size = `${v}`.length
+                return r === 0 ? size * 2 : size
+            }
+            alignment_fn = function(r, c, v) {
+                return c === 2 ? "right" : "left"
+            }
+            s += text_table(table, size_fn, alignment_fn)
+
+            const detail = []
+            orders.reduce(function(a, b) {
+                for (let i = 0; i < b.count; i++) {
+                    a.push(b.length)
+                }
+                return a
+            }, detail)
+            const result = []
+            cutting_stock(material, losses, detail).forEach(a1 => {
+                const items = result.filter(a2 => same_array(a1, a2.solution))
+                if (items.length > 0) {
+                    items[0]["count"]++
+                } else {
+                    result.push({solution: a1, count: 1})
+                }
+            })
+            
+            // 切割方案
+            table = [["序号", "尺寸", "余料", "数量"]]
+            const waste = {}
+            result.forEach((r, i) => {
+                const solution = r.solution
+                const w = Math.max(0, material - solution.reduce((a, c) => a + c, 0) - solution.length * losses)
+                if (w > 0) {
+                    waste[w] = (waste[w] ? waste[w] : 0) + r.count
+                }
+                table.push([i + 1, solution.join(", "), w, r.count])
+            })
+            const total = result.reduce((prev, curr) => prev + curr.count, 0)
+            alignment_fn = function(r, c, v) {
+                return c === 2 || c === 3 ? "right" : "left"
+            }
+            s += `\n切割方法：共 ${total} 根材料\n` + text_table(table, size_fn, alignment_fn) + `\n余料：\n`
+
+            // 余料详情
+            table = [["序号", "余料", "数量"]]
+            alignment_fn = function(r, c, v) {
+                return c === 0 ? "left" : "right"
+            }
+            let i = 1
+            for (const k in waste) {
+                if (waste.hasOwnProperty(k)) {
+                    table.push([i++, k, waste[k]])
+                }
+            }
+            s += text_table(table, size_fn, alignment_fn)
+            return s
+        }
 
         function error(s) {
             $.confirm({
@@ -110,6 +224,22 @@
                     }
                 }
             });
+        }
+
+        function same_array(a1, a2) {
+            if (a1.length != a2.length) {
+                return false
+            }
+            a2 = a2.slice()
+            for (let i = 0; i < a1.length; i++) {
+                const pos = a2.indexOf(a1[i])
+                if (pos > -1) {
+                    a2.splice(pos, 1)
+                } else {
+                    return false
+                }
+            }
+            return true
         }
 
         function isPositiveNumber(s) {
@@ -150,6 +280,10 @@
             orders = orders.slice()
             while (orders.length > 0) {
                 const solution = cut(orders)
+                if (solution.length === 0) {
+                    error("程序错误")
+                    return
+                }
                 solution.forEach(l => {
                     const pos = orders.indexOf(l)
                     if (pos > -1) {
@@ -159,6 +293,62 @@
                 solutions.push(solution)
             }
             return solutions
+        }
+
+        function text_table(data, size_fn, alignment_fn) {
+            if (typeof(size_fn) !== "function") {
+                size_fn = function(r, c, v) {
+                    return `${v}`.length
+                }
+            }
+            if (typeof(alignment_fn) != "function") {
+                alignment_fn = function(r, c, v) {
+                    return "left"
+                }
+            }
+
+            const width = []
+            data.forEach((row, r) => {
+                row.forEach((cell, c) => {
+                    if (c + 1 > width.length) {
+                        width.push(0)
+                    }
+                    width[c] = Math.max(width[c], size_fn(r, c, cell))
+                    if (width[c] % 2 != 0) {
+                        width[c] = width[c] + 1
+                    }
+                })
+            })
+
+            const border = function() {
+                let s = ""
+                for (i = 0; i < width.length; i++) {
+                    s += "+-" + "-".repeat(width[i]) + "-"
+                }
+                s += "+"
+                return s
+            }()
+
+            let s = ""
+            data.forEach((row, r) => {
+                s += border + "\n"
+                row.forEach((cell, c) => {
+                    const alignment = alignment_fn(r, c, cell)
+                    s += "| "
+                    const repeat = width[c] - size_fn(r, c, cell)
+                    if (alignment === "left") {
+                        s += cell
+                        s += " ".repeat(repeat)
+                    } else {
+                        s += " ".repeat(repeat)
+                        s += cell
+                    }
+                    s += " "
+                })
+                s += "|\n"
+            })
+            s += border
+            return s
         }
     </script>
 </body>
