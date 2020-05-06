@@ -124,12 +124,7 @@
           this.orders.sort((x, y) => x.length - y.length)
         },
         remove(length) {
-          for (let i = 0; i < this.orders.length; i++) {
-            if (this.orders[i].length === length) {
-              this.orders.splice(i, 1)
-              return
-            }
-          }
+          this.orders = this.orders.filter(order => order.length != length)
         },
         addOrder() {
           this.add(this.length, this.count)
@@ -142,11 +137,11 @@
         },
         compute() {
           if (typeof(this.material) !== 'number' || this.material <= 0
-            || typeof(this.losses) !== 'number' || this.losses < 0
+            || this.losses < 0
             || this.material < this.losses) {
             return
           }
-          this.solution = cut_and_print(this.material, this.losses, this.orders)
+          this.solution = cut_and_print(this.material, this.losses || 0, this.orders)
         }
       }
     })
