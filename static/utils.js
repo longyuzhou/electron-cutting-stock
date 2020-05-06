@@ -9,7 +9,7 @@ function cut_and_print(material, losses, orders) {
   // 订单二维数组转一维
   const detail = orders.reduce((p, c) => {
     range(c.count).forEach(() => p.push(c.length))
-	  return p
+    return p
   }, [])
   // 调用材料分割算法
   const result = []
@@ -97,12 +97,12 @@ function same_array(a1, a2) {
  * @param {Function} alignment_fn function(r, c, v) {} 单元格对齐方式（left、right）（默认左对齐）
  */
 function text_table(data, size_fn, alignment_fn) {
-  if (typeof (size_fn) !== 'function') {
+  if (typeof size_fn !== 'function') {
     size_fn = function (r, c, v) {
       return `${v}`.length
     }
   }
-  if (typeof (alignment_fn) !== 'function') {
+  if (typeof alignment_fn !== 'function') {
     alignment_fn = function (r, c, v) {
       return 'left'
     }
@@ -146,23 +146,23 @@ function text_table(data, size_fn, alignment_fn) {
  * range(stop)，range(start, stop[, step])
  */
 function range() {
-	let start = 0
-	let stop = 0
-	let step = 1
-  
+  let start = 0
+  let stop = 0
+  let step = 1
+
   const size = arguments.length
-	if (size === 1) {
-		stop = arguments[0]
-	} else if (size >= 2) {
-		start = arguments[0]
-		stop = arguments[1]
-	} else if (size >= 3) {
-		step = arguments[2]
-	}
-	
-	const nums = []
-	for (let i = start; i < stop; i = i + step) {
-		nums.push(i)
-	}
-	return nums
+  if (size === 1) {
+    stop = arguments[0]
+  } else if (size >= 2) {
+    start = arguments[0]
+    stop = arguments[1]
+  } else if (size >= 3) {
+    step = arguments[2]
+  }
+
+  const nums = []
+  for (let i = start; i < stop; i = i + step) {
+    nums.push(i)
+  }
+  return nums
 }
