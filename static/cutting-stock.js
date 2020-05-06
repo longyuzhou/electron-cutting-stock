@@ -18,7 +18,7 @@ function firstFitDecreasing(capacity, gap, items) {
   }
 
   items.forEach(size => {
-    // find the first bin that can fit accommodate the item
+    // find the first bin that can accommodate the item
     const bin = bins.find(b => binSize(b) + gap + size <= capacity)
     // found, place the item
     if (bin) {
