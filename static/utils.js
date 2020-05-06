@@ -17,7 +17,7 @@ function cut_and_print(material, losses, orders) {
     // 如果切割方案相同，则合并计数
     const items = result.filter(a2 => same_array(a1, a2.solution))
     if (items.length > 0) {
-      items[0]["count"]++
+      items[0]['count']++
     } else {
       result.push({ solution: a1, count: 1 })
     }
@@ -25,7 +25,7 @@ function cut_and_print(material, losses, orders) {
 
   // 打印输入参数
   let s = `材料长度：${material}\n切割损耗：${losses}\n订单：\n`
-  let table = [["序号", "尺寸", "数量"]]
+  let table = [['序号', '尺寸', '数量']]
   orders.forEach((order, i) => {
     table.push([i + 1, order.length, order.count])
   })
@@ -34,12 +34,12 @@ function cut_and_print(material, losses, orders) {
     return r === 0 ? size * 2 : size
   }
   alignment_fn = function (r, c, v) {
-    return c === 2 ? "right" : "left"
+    return c === 2 ? 'right' : 'left'
   }
   s += text_table(table, size_fn, alignment_fn)
 
   // 打印切割方案
-  table = [["序号", "尺寸", "余料", "数量"]]
+  table = [['序号', '尺寸', '余料', '数量']]
   const waste = {}
   result.forEach((r, i) => {
     const solution = r.solution
@@ -47,18 +47,18 @@ function cut_and_print(material, losses, orders) {
     if (w > 0) {
       waste[w] = (waste[w] ? waste[w] : 0) + r.count
     }
-    table.push([i + 1, solution.join(", "), w, r.count])
+    table.push([i + 1, solution.join(', '), w, r.count])
   })
   const total = result.reduce((prev, curr) => prev + curr.count, 0)
   alignment_fn = function (r, c, v) {
-    return c === 2 || c === 3 ? "right" : "left"
+    return c === 2 || c === 3 ? 'right' : 'left'
   }
   s += `\n切割方法：共 ${total} 根材料\n` + text_table(table, size_fn, alignment_fn) + `\n余料：\n`
 
   // 打印余料详情
-  table = [["序号", "余料", "数量"]]
+  table = [['序号', '余料', '数量']]
   alignment_fn = function (r, c, v) {
-    return c === 0 ? "left" : "right"
+    return c === 0 ? 'left' : 'right'
   }
   let i = 1
   for (const k in waste) {
@@ -97,14 +97,14 @@ function same_array(a1, a2) {
  * @param {Function} alignment_fn function(r, c, v) {} 单元格对齐方式（left、right）（默认左对齐）
  */
 function text_table(data, size_fn, alignment_fn) {
-  if (typeof (size_fn) !== "function") {
+  if (typeof (size_fn) !== 'function') {
     size_fn = function (r, c, v) {
       return `${v}`.length
     }
   }
-  if (typeof (alignment_fn) != "function") {
+  if (typeof (alignment_fn) !== 'function') {
     alignment_fn = function (r, c, v) {
-      return "left"
+      return 'left'
     }
   }
 
@@ -118,25 +118,25 @@ function text_table(data, size_fn, alignment_fn) {
     })
   })
 
-  const border = "+-" + width.map(w => "-".repeat(w)).join("-+-") + "-+"
+  const border = '+-' + width.map(w => '-'.repeat(w)).join('-+-') + '-+'
 
-  let s = ""
+  let s = ''
   data.forEach((row, r) => {
-    s += border + "\n"
+    s += border + '\n'
     row.forEach((cell, c) => {
       const alignment = alignment_fn(r, c, cell)
-      s += "| "
+      s += '| '
       const repeat = width[c] - size_fn(r, c, cell)
-      if (alignment === "left") {
+      if (alignment === 'left') {
         s += cell
-        s += " ".repeat(repeat)
+        s += ' '.repeat(repeat)
       } else {
-        s += " ".repeat(repeat)
+        s += ' '.repeat(repeat)
         s += cell
       }
-      s += " "
+      s += ' '
     })
-    s += "|\n"
+    s += '|\n'
   })
   s += border
   return s
