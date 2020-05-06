@@ -1,36 +1,41 @@
-// best fit decreasing
-cutting_stock = (capacity, padding, weights) => {
-  // 由重到轻排列
-  weights.sort((x, y) => y - x)
+/**
+ * 求解装箱问题：将所有物品由大到小排序，然后使用Best-Fit算法求解
+ * 
+ * @param {number} capacity 箱子容量
+ * @param {number} gap 物品间距
+ * @param {Array} items 所有物品的大小
+ */
+function bestFitDecreasing(capacity, gap, items) {
+  // 由大到小排列
+  items.sort((x, y) => y - x)
 
-  // 所有的bin
+  // 所有的箱子
   const bins = []
 
-  // 数组中元素求和
-  const sum_nums = (array) => {
-    return array.reduce((p, c) => p + c, 0)
+  // 计算箱子已使用的空间
+  const binSize = (bin) => {
+    return bin.reduce((p, c) => p + c, 0) + (bin.length - 1) * gap
   }
 
-  weights.forEach(w => {
-    // 找到能放下的bin
+  items.forEach(size => {
+    // 找到能放下当前物品的箱子
     const bs = bins.filter(b => {
-      const sum = b.reduce((p, v) => p + v, 0)
-      return sum + b.length * padding + w <= capacity
+      return binSize(b) + gap + size <= capacity
     })
-    // 如果没有，则再拿一个bin
+    // 如果没有，则再拿一个新的箱子
     if (bs.length === 0) {
-      bins.push([w])
+      bins.push([size])
     }
-    // 如果有，则放到最重的那个bin中
+    // 如果有，则放到剩余空间最少的箱子中
     else {
-      bs.sort((x, y) => sum_nums(x) - sum_nums(y)) // 由轻到重排列
-      bs.pop().push(w)
+      bs.sort((x, y) => binSize(x) - binSize(y)) // 箱子剩余空间有多到少排序
+      bs.pop().push(size)
     }
   })
   return bins
 }
 
-test_cutting_stock = () => {
+function testBestFitDecreasing() {
   const orders = [
     [1380, 22],
     [1520, 25],
@@ -48,13 +53,13 @@ test_cutting_stock = () => {
   ]
   const capacity = 5600
   const padding = 0
-  const weights = []
+  const items = []
   orders.reduce((p, c) => {
     for (let i = 0; i < c[1]; i++) {
       p.push(c[0])
     }
     return p
-  }, weights)
-  const bins = cutting_stock(capacity, padding, weights)
+  }, items)
+  const bins = bestFitDecreasing(capacity, padding, items)
   console.log(bins.length === 82)
 }

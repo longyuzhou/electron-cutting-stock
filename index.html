@@ -1,6 +1,5 @@
 <!doctype html>
 <html class="h-100">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -13,9 +12,16 @@
   <script src="./static/vue.min.js"></script>
   <script src="./static/cutting-stock.js"></script>
   <script src="./static/utils.js"></script>
+  <style>
+    .solution {
+      font-family: '黑体';
+      background-color: white;
+      font-size: 17px;
+      line-height: 17px;
+    }
+  </style>
   <title>材料切割</title>
 </head>
-
 <body class="h-100" style="padding: 10px 0px;">
   <div id="app" class="container-fluid h-100">
     <div class="row h-100">
@@ -32,10 +38,10 @@
           <label for="orders">订单</label>
           <div class="form-row">
             <div class="col-5">
-              <input type="number" class="form-control" placeholder="尺寸" min="1" step="any" id="length" v-model.number="length" v-on:keyup.enter="addOrder">
+              <input type="number" class="form-control" placeholder="尺寸" min="1" step="any" v-model.number="length" @keyup.enter="addOrder">
             </div>
             <div class="col-4">
-              <input type="number" class="form-control" placeholder="数量" required min="1" v-model.number="count" v-on:keyup.enter="addOrder">
+              <input type="number" class="form-control" placeholder="数量" required min="1" v-model.number="count" @keyup.enter="addOrder">
             </div>
             <div class="col-3">
               <button class="btn btn-primary btn-block" @click="addOrder">添加</button>
@@ -53,7 +59,7 @@
         <button class="btn btn-primary btn-block" @click="compute">计算</button>
       </div>
       <div class="col h-100">
-        <textarea class="form-control h-100" style="font-family: '黑体'; background-color: white;" readonly id="solutions" v-model="solution"></textarea>
+        <textarea class="form-control h-100 solution" readonly v-model="solution"></textarea>
       </div>
     </div>
   </div>
@@ -162,5 +168,4 @@
     }
   </script>
 </body>
-
 </html>

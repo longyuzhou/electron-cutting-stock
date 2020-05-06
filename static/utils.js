@@ -1,3 +1,10 @@
+/**
+ * 执行材料切割，并输出结果（使用文本表格显示）
+ * 
+ * @param {number} material 材料长度
+ * @param {number} losses 切割损耗
+ * @param {Array} orders 订单（材料长度，所需数量）
+ */
 function cut_and_print(material, losses, orders) {
   // 订单二维数组转一维
   const detail = orders.reduce((p, c) => {
@@ -6,7 +13,7 @@ function cut_and_print(material, losses, orders) {
   }, [])
   // 调用材料分割算法
   const result = []
-  cutting_stock(material, losses, detail).forEach(a1 => {
+  bestFitDecreasing(material, losses, detail).forEach(a1 => {
     // 如果切割方案相同，则合并计数
     const items = result.filter(a2 => same_array(a1, a2.solution))
     if (items.length > 0) {
@@ -85,9 +92,9 @@ function same_array(a1, a2) {
 /**
  * 将二维数组输出为纯文本表格
  * 
- * @param {*} data 二维数组
- * @param {*} size_fn function(r, c, v) {} 单元格宽度（默认字符长度）
- * @param {*} alignment_fn function(r, c, v) {} 单元格对齐方式（left、right）（默认左对齐）
+ * @param {Array} data 二维数组
+ * @param {Function} size_fn function(r, c, v) {} 单元格宽度（默认字符长度）
+ * @param {Function} alignment_fn function(r, c, v) {} 单元格对齐方式（left、right）（默认左对齐）
  */
 function text_table(data, size_fn, alignment_fn) {
   if (typeof (size_fn) !== "function") {
@@ -135,7 +142,9 @@ function text_table(data, size_fn, alignment_fn) {
   return s
 }
 
-// like range in python, but only support number parameters
+/**
+ * range(stop)，range(start, stop[, step])
+ */
 function range() {
 	let start = 0
 	let stop = 0
@@ -144,12 +153,10 @@ function range() {
   const size = arguments.length
 	if (size === 1) {
 		stop = arguments[0]
-	}
-	if (size >= 2) {
+	} else if (size >= 2) {
 		start = arguments[0]
 		stop = arguments[1]
-	}
-	if (size >= 3) {
+	} else if (size >= 3) {
 		step = arguments[2]
 	}
 	
