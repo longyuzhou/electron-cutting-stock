@@ -1,30 +1,30 @@
 /**
- * 使用First Fit Decreasing算法求解装箱问题
+ * First Fit Decreasing
  * 
- * @param {number} capacity 箱子容量
- * @param {number} gap 物品间距
- * @param {Array} items 所有物品的大小
+ * @param {number} capacity apacity of bin
+ * @param {number} gap gap between items（item, gap, item, gap ... item）
+ * @param {Array} items items' sizes
  */
 function firstFitDecreasing(capacity, gap, items) {
-  // 由大到小排列
+  // sort items in non-increasing order of their sizes
   items.sort((x, y) => y - x)
 
-  // 所有的箱子
+  // all the bins
   const bins = []
 
-  // 计算箱子已使用的空间
+  // calculate occupied space of bin
   const binSize = (bin) => {
     return bin.reduce((p, c) => p + c, 0) + (bin.length - 1) * gap
   }
 
   items.forEach(size => {
-    // 找到能放下当前物品的箱子
+    // find the first bin that can fit accommodate the item
     const bin = bins.find(b => binSize(b) + gap + size <= capacity)
-    // 如果有，则放入
+    // found, place the item
     if (bin) {
       bin.push(size)
     }
-    // 如果没有，则放入新箱子
+    // not found, place the item within a new bin
     else {
       bins.push([size])
     }
