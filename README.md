@@ -2,7 +2,11 @@
 
 A electron based application, used to solve cutting stock problem.
 
-**Notice: I'm using "First Fit Decreasing" algorithm, which will not give you the best solution.**
+## Algorithm
+
+**I'm using "First Fit Decreasing" algorithm, which will not give you the best solution.**
+
+The implementation is in [this](static/cutting-stock.js) file.
 
 ## Resources
 
