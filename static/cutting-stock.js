@@ -1,11 +1,11 @@
 /**
- * 求解装箱问题：将所有物品由大到小排序，然后使用Best-Fit算法求解
+ * 使用First Fit Decreasing算法求解装箱问题
  * 
  * @param {number} capacity 箱子容量
  * @param {number} gap 物品间距
  * @param {Array} items 所有物品的大小
  */
-function bestFitDecreasing(capacity, gap, items) {
+function firstFitDecreasing(capacity, gap, items) {
   // 由大到小排列
   items.sort((x, y) => y - x)
 
@@ -19,23 +19,20 @@ function bestFitDecreasing(capacity, gap, items) {
 
   items.forEach(size => {
     // 找到能放下当前物品的箱子
-    const bs = bins.filter(b => {
-      return binSize(b) + gap + size <= capacity
-    })
-    // 如果没有，则再拿一个新的箱子
-    if (bs.length === 0) {
-      bins.push([size])
+    const bin = bins.find(b => binSize(b) + gap + size <= capacity)
+    // 如果有，则放入
+    if (bin) {
+      bin.push(size)
     }
-    // 如果有，则放到剩余空间最少的箱子中
+    // 如果没有，则放入新箱子
     else {
-      bs.sort((x, y) => binSize(x) - binSize(y)) // 箱子剩余空间有多到少排序
-      bs.pop().push(size)
+      bins.push([size])
     }
   })
   return bins
 }
 
-function testBestFitDecreasing() {
+function testFirstFitDecreasing() {
   const orders = [
     [1380, 22],
     [1520, 25],
@@ -60,6 +57,6 @@ function testBestFitDecreasing() {
     }
     return p
   }, items)
-  const bins = bestFitDecreasing(capacity, padding, items)
+  const bins = firstFitDecreasing(capacity, padding, items)
   console.log(bins.length === 82)
 }

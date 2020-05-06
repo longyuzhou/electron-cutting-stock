@@ -13,7 +13,7 @@ function cut_and_print(material, losses, orders) {
   }, [])
   // 调用材料分割算法
   const result = []
-  bestFitDecreasing(material, losses, detail).forEach(a1 => {
+  firstFitDecreasing(material, losses, detail).forEach(a1 => {
     // 如果切割方案相同，则合并计数
     const items = result.filter(a2 => same_array(a1, a2.solution))
     if (items.length > 0) {
