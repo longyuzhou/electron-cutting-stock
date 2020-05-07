@@ -5,13 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="./static/bootstrap.min.css">
   <link rel="stylesheet" href="./static/jquery-confirm.min.css">
-  <script src="./static/jquery-3.4.1.slim.min.js"></script>
-  <script src="./static/popper.min.js"></script>
-  <script src="./static/bootstrap.min.js"></script>
-  <script src="./static/jquery-confirm.min.js"></script>
-  <script src="./static/vue.min.js"></script>
-  <script src="./static/cutting-stock.js"></script>
-  <script src="./static/utils.js"></script>
   <style>
     .solution {
       font-family: '黑体';
@@ -20,6 +13,13 @@
       line-height: 17px;
     }
   </style>
+  <script src="./static/jquery-3.4.1.slim.min.js"></script>
+  <script src="./static/popper.min.js"></script>
+  <script src="./static/bootstrap.min.js"></script>
+  <script src="./static/jquery-confirm.min.js"></script>
+  <script src="./static/vue.min.js"></script>
+  <script src="./static/cutting-stock.js"></script>
+  <script src="./static/utils.js"></script>
   <title>材料切割</title>
 </head>
 <body class="h-100" style="padding: 10px 0px;">
@@ -38,13 +38,13 @@
           <label for="orders">订单</label>
           <div class="form-row">
             <div class="col-5">
-              <input type="number" class="form-control" placeholder="尺寸" min="1" step="any" v-model.number="length" @keyup.enter="addOrder">
+              <input id="length" type="number" class="form-control" placeholder="尺寸" min="1" step="any" v-model.number="length" @keyup.enter="onAddOrder">
             </div>
             <div class="col-4">
-              <input type="number" class="form-control" placeholder="数量" required min="1" v-model.number="count" @keyup.enter="addOrder">
+              <input type="number" class="form-control" placeholder="数量" required min="1" v-model.number="count" @keyup.enter="onAddOrder">
             </div>
             <div class="col-3">
-              <button class="btn btn-primary btn-block" @click="addOrder">添加</button>
+              <button class="btn btn-primary btn-block" @click="onAddOrder">添加</button>
             </div>
           </div>
         </div>
@@ -52,11 +52,11 @@
           <ul class="list-group" id="orders">
             <li class="list-group-item d-flex justify-content-between align-items-center" v-for="order in orders">
               {{ order.length }} &times; {{ order.count }}
-              <button type="button" class="btn btn-danger" @click="removeOrder(order.length)">删除</button>
+              <button type="button" class="btn btn-danger" @click="onRemoveOrder(order.length)">删除</button>
             </li>
           </ul>
         </div>
-        <button class="btn btn-primary btn-block" @click="compute">计算</button>
+        <button class="btn btn-primary btn-block" @click="onCompute">计算</button>
       </div>
       <div class="col h-100">
         <textarea class="form-control h-100 solution" readonly v-model="solution"></textarea>
@@ -75,9 +75,9 @@
         solution: ''
       },
       created() {
-        this.add(100, 20)
-        this.add(190, 20)
-        this.add(300, 20)
+        this.addOrder(100, 20)
+        this.addOrder(190, 20)
+        this.addOrder(300, 20)
       },
       watch: {
         material: function(val) {
@@ -114,7 +114,7 @@
         }
       },
       methods: {
-        add(length, count) {
+        addOrder(length, count) {
           if (typeof(length) !== 'number' || length <= 0
             || typeof(count) !== 'number' || count < 1
             || typeof(this.material) !== 'number' || length > this.material) {
@@ -129,19 +129,19 @@
           }
           this.orders.sort((x, y) => x.length - y.length)
         },
-        remove(length) {
+        removeOrder(length) {
           this.orders = this.orders.filter(order => order.length != length)
         },
-        addOrder() {
-          this.add(this.length, this.count)
-          $('#length').focus()
+        onAddOrder() {
+          this.addOrder(this.length, this.count)
           this.length = null
           this.count = 1
+          $('#length').focus()
         },
-        removeOrder(length) {
-          this.remove(length)
+        onRemoveOrder(length) {
+          this.removeOrder(length)
         },
-        compute() {
+        onCompute() {
           if (typeof(this.material) !== 'number' || this.material <= 0
             || this.losses < 0
             || this.material < this.losses) {
